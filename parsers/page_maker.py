@@ -1,4 +1,5 @@
 from telegraph import Telegraph
+from time import localtime
 
 
 def get_page(title: str, raw_body: str):
@@ -7,7 +8,7 @@ def get_page(title: str, raw_body: str):
     telegraph.create_account(short_name='dvizh_bot')
     response = telegraph.create_page(
         title=title,
-        author_name='DVIZH',
+        author_name=f'DVIZH•{localtime().tm_hour} : {localtime().tm_min}',
         content=body,
         html_content=None
     )
