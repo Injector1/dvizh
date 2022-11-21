@@ -1,0 +1,6 @@
+aiogram
+telegraph
+requests
+schedule
+bs4
+beautifulsoup4
