@@ -2,6 +2,8 @@ from app.features.base import BaseParser
 
 
 class SportsRUParser(BaseParser):
+    base_url = ''
+
     def parse(self):
         pass
 

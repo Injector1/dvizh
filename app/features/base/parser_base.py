@@ -1,7 +1,15 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 
 
 class BaseParser(ABC):
+    @property
+    @abstractmethod
+    def base_url(self):
+        """
+        :return: base url of sports website
+        """
+        pass
+
     @abstractmethod
     def parse(self):
         """
