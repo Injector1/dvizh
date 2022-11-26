@@ -4,3 +4,5 @@ requests
 schedule
 bs4
 beautifulsoup4
+pydantic
+tortoise-orm
