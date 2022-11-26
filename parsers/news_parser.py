@@ -29,10 +29,7 @@ def article_url_to_telegraph(url) -> (str, str):
 
 
 def is_item_in_sequence(item:str, m: list[(str, str)]) -> bool:
-    for title, _ in m:
-        if item == title:
-            return True
-    return False
+    return any(item == title for title, _ in m)
 
 
 def update_all_telegraph_articles():
