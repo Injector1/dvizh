@@ -1,7 +1,6 @@
 import threading
 
 from telegraph import Telegraph
-from tortoise import Tortoise, run_async
 
 from app.features.parser import ParserService, SportsRUParser
 from app.features.telegraf import TelegrafService, TelegrafRepository, TelegrafModel
