@@ -1,13 +1,13 @@
 from aiogram import executor, types
-from bot import dp
 from database import get_from_database, add_to_database
-from parsers import get_random_news, get_latest_news, start_updating
+from parsers import get_latest_news, start_updating
 import threading
 
 
 def add_commands(commands: list) -> None:
     for command in commands:
-        dp.register_message_handler(command[0], commands=command[1])
+        pass
+        #dp.register_message_handler(command[0], commands=command[1])
 
 
 async def add_team(message: types.Message):
@@ -57,12 +57,13 @@ async def send_news(message: types.Message):
 
     text = message.text.split()
     if len(text) == 1:
-        title, href = get_random_news(team)
+        title, href = get_latest_news(team)
     else:
         title, href = get_latest_news(team)
     await message.answer(f'{title}[.]({href})', parse_mode='Markdown')
 
 
 if __name__ == "__main__":
+    exit('Это устаревший файл. Сейчас запуск всего происходит из файта bot.py')
     thr1 = threading.Thread(target=start_updating).start()
     main()

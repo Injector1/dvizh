@@ -1,2 +1,2 @@
-from repository_base import BaseRepository
-from parser_base import BaseParser
+from .repository_base import BaseRepository
+from .parser_base import BaseParser
