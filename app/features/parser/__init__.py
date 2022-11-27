@@ -1,1 +1,2 @@
-from .service import start_updating
+from .service import ParserService
+from .parsers import SportsRUParser

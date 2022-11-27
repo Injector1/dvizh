@@ -1,18 +1,18 @@
 from typing import List
 
 from app.features.base import BaseRepository
-from schemas import *
+from .schemas import *
 
 
-class ArticleRepository(BaseRepository):
-    def get_by_id(self, id: str) -> Article:
+class TelegrafRepository(BaseRepository):
+    def get_by_id(self, id: str) -> TelegrafScheme:
         pass
 
-    def get_all(self) -> List[Article]:
+    def get_all(self) -> List[TelegrafScheme]:
         pass
 
-    def create(self, article: ArticleCreate) -> Article:
+    def create(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
         pass
 
-    def put(self, *args, **kwargs) -> Article:
+    def put(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
         pass

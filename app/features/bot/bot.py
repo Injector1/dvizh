@@ -1,6 +1,7 @@
 from aiogram import executor, types
+
 from database import get_from_database, add_to_database
-from app.features.parser import start_updating
+from app.features.parser import ParserService
 from app.config import ARTICLES_BY_NAME
 from app.features.parser.parsers import SportsRUParser
 import threading
@@ -9,10 +10,8 @@ from aiogram import Bot, Dispatcher
 
 
 class NewsBot:
-    def __init__(self):
-        self.parser = SportsRUParser()
-        token = '5914366318:AAFihB-KhrA_8-AMX4XuRhwmwHkXgzYEDug'
-        bot = Bot(token=token)
+    def __init__(self, bot_token: str):
+        bot = Bot(token=bot_token)
         self.dp = Dispatcher(bot)
         logging.basicConfig(level=logging.INFO)
 
@@ -28,7 +27,7 @@ class NewsBot:
 
     async def add_team(self, message: types.Message):
         try:
-            username, team = message.chat['username'], message.text.split()[1]
+            username, team = message.chat['username'], ' '.join(message.text.split()[1:])
         except IndexError:
             await message.answer(f'Неверный формат. Попробуйте\n/set <название_команды>')
             return
@@ -62,9 +61,3 @@ class NewsBot:
             return
         title, href = ARTICLES_BY_NAME[team][0]
         await message.answer(f'[{title}]({href})', parse_mode='Markdown')
-
-
-if __name__ == "__main__":
-    thr1 = threading.Thread(target=start_updating).start()
-    b = NewsBot()
-    b.add_commands()

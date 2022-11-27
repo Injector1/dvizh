@@ -1,5 +1,5 @@
 def get_from_database() -> dict:
-    with open('../../../database/users.txt', 'r') as file:
+    with open('database/users.txt', 'r', encoding='utf-8') as file:
         file_data = file.readline()[1:-1].split(', ')
         if len(file_data[0]) == 0:
             return dict()
@@ -8,6 +8,6 @@ def get_from_database() -> dict:
 
 def add_to_database(user_id: str, team: str) -> None:
     items = get_from_database()
-    with open('../../../database/users.txt', 'w+') as file:
+    with open('database/users.txt', 'w+', encoding='utf-8') as file:
         items[user_id] = team
         file.write(str(items))

@@ -1,1 +1,1 @@
-{'kuzuzma': 'Барселона', 'injector1': 'barcelona'}
+{'injector1': 'Р РµР°Р» РњР°РґСЂРёРґ'}
