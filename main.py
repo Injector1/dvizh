@@ -1,14 +1,15 @@
 import threading
 
 from telegraph import Telegraph
+from tortoise import Tortoise, run_async
 
 from app.features.parser import ParserService, SportsRUParser
-from app.features.telegraf import TelegrafService, TelegrafRepository
+from app.features.telegraf import TelegrafService, TelegrafRepository, TelegrafModel
 from app.features.bot.bot import NewsBot
 
 
 if __name__ == "__main__":
-    telegraf_repository = TelegrafRepository()
+    telegraf_repository = TelegrafRepository(TelegrafModel())
     telegraf_service = TelegrafService(
         telegraf=Telegraph(),
         telegraf_repository=telegraf_repository,

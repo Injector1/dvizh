@@ -15,7 +15,7 @@ class TelegrafService:
         self.telegraf_repository = telegraf_repository
         self.telegraf.create_account(short_name=account_name)
 
-    def create_telegraf_article(self, article: ArticleCreateOrUpdateScheme):
+    async def create_telegraf_article(self, article: ArticleCreateOrUpdateScheme):
         body = [i + '\n\n' for i in article.content.split('\n')]
         response = self.telegraf.create_page(
             title=article.title,
@@ -28,5 +28,5 @@ class TelegrafService:
             url=f'https://telegra.ph/{response["path"]}',
             team_name=article.team_name
         )
-        self.telegraf_repository.create(telegraf_article)
+        await self.telegraf_repository.create(telegraf_article)
         return telegraf_article.url
