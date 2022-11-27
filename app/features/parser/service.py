@@ -14,10 +14,7 @@ class ParserService:
             print(f'Updating team {name}')
             for site, tag in TAGS[name].items():
                 if site in self.method_by_site.keys():
-                    article_info = self.method_by_site[site].get_markdown_view(
-                        self.sportsru_parser.parse(tag),
-                        name
-                    )
+                    article_info = self.method_by_site[site].get_markdown_view(tag, name)
                     if ARTICLES_BY_NAME[name][0] != article_info:
                         print('Change!')
                     ARTICLES_BY_NAME[name][0] = article_info

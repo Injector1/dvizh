@@ -19,7 +19,7 @@ class BaseParser(ABC):
         pass
 
     @abstractmethod
-    def get_markdown_view(self, url: str):
+    def get_markdown_view(self, tag: str, team_name: str):
         """
         :return: markdown view of article
         """
