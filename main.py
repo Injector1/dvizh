@@ -5,13 +5,13 @@ from telegraph import Telegraph
 
 from create_schema import database_creation, close_connection
 from app.features.parser import ParserService, SportsRUParser
-from app.features.telegraf import TelegrafService, TelegrafRepository, TelegrafModel
+from app.features.telegraf import TelegrafService, TelegrafModel, JsonRepo
 from app.features.bot.bot import NewsBot
 
 
 if __name__ == "__main__":
     telegraph_model = TelegrafModel()
-    telegraf_repository = TelegrafRepository(telegraph_model)
+    telegraf_repository = JsonRepo(telegraph_model)
     telegraf_service = TelegrafService(
         telegraf=Telegraph(),
         telegraf_repository=telegraf_repository,
@@ -26,16 +26,16 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(database_creation())
+        '''
         print(asyncio.run(TelegrafModel.create(
             title='sdfsdf',
             telegraf_url='sdf',
             team_name='sd'
         )))
         parser_service.start_updating()
-        # thr1 = threading.Thread(target=parser_service.start_updating).start()
+        '''
+        thr1 = threading.Thread(target=parser_service.start_updating).start()
         b = NewsBot(bot_token='5914366318:AAFihB-KhrA_8-AMX4XuRhwmwHkXgzYEDug')
         b.add_commands()
     finally:
         asyncio.run(close_connection())
-    # finally:
-    #     asyncio.run(close_connection())

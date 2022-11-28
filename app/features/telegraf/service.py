@@ -4,13 +4,14 @@ from time import localtime
 
 from .schemas import ArticleCreateOrUpdateScheme, TelegrafCreateOrUpdateScheme
 from .repository import TelegrafRepository
+from .json_repo import JsonRepo
 
 
 class TelegrafService:
     def __init__(
             self,
             telegraf: Telegraph,
-            telegraf_repository: TelegrafRepository,
+            telegraf_repository: [TelegrafRepository, JsonRepo],
             account_name: str):
         self.telegraf = telegraf
         self.telegraf_repository = telegraf_repository
