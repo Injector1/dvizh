@@ -12,7 +12,8 @@ def add_commands(commands: list) -> None:
 
 async def add_team(message: types.Message):
     try:
-        username, team = message.chat['username'], message.text.split()[1]
+        text = message.text
+        username, team = message.chat['username'], ' '.join(text.split()[1:])
     except IndexError:
         await message.answer(f'Неверный формат. Попробуйте\n/set <название_команды>')
         return
