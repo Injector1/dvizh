@@ -1,13 +1,15 @@
+import json
+
+
+FILE = './database/data.json'
+
+
 def get_from_database() -> dict:
-    with open('database/users.txt', 'r', encoding='utf-8') as file:
-        file_data = file.readline()[1:-1].split(', ')
-        if len(file_data[0]) == 0:
-            return dict()
-        return dict([(s.split(': ')[0][1:-1], s.split(': ')[1][1:-1]) for s in file_data])
+    return json.load(open(FILE, encoding='utf-8'))['users']
 
 
 def add_to_database(user_id: str, team: str) -> None:
-    items = get_from_database()
-    with open('database/users.txt', 'w+', encoding='utf-8') as file:
-        items[user_id] = team
-        file.write(str(items))
+    data = json.load(open(FILE, encoding='utf-8'))
+    data['users'][user_id] = team
+    with open(FILE, "w", encoding='utf-8') as outfile:
+        outfile.write(json.dumps(data, indent=4))

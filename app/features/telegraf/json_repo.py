@@ -10,7 +10,7 @@ from app.features.telegraf.models import TelegrafModel
 class JsonRepo(BaseRepository):
     def __init__(self, model: TelegrafModel):
         self.model = model
-        self.file = 'app/features/telegraf/data.json'
+        self.file = './database/data.json'
 
     def get_by_id(self, id: str) -> TelegrafScheme:
         for data in json.load(open(self.file, encoding='utf-8'))['articles']:
@@ -39,12 +39,14 @@ class JsonRepo(BaseRepository):
     async def create(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
         data = json.load(open(self.file, encoding='utf-8'))
         await asyncio.sleep(0.1)
-        telegraf_obj = TelegrafScheme(id=len(data['articles']) + 1, **article.dict())
-        data['articles'].append(telegraf_obj.json())
-        with open(self.file, "w", encoding='utf-8') as outfile:
-            outfile.write(json.dumps(data, indent=4))
-
-        return telegraf_obj
+        similar = self.find_all(title=article.title)
+        if len(similar) == 0:
+            telegraf_obj = TelegrafScheme(id=len(data['articles']) + 1, **article.dict())
+            data['articles'].append(telegraf_obj.json())
+            with open(self.file, "w", encoding='utf-8') as outfile:
+                outfile.write(json.dumps(data, indent=4))
+            return telegraf_obj
+        return TelegrafScheme(id=similar[0].id, **article.dict())
 
     def put(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
         m = json.load(open(self.file, encoding='utf-8'))

@@ -56,5 +56,8 @@ class NewsBot:
         if team not in ARTICLES_BY_NAME.keys():
             await message.answer('Неизвестная футбольная команда')
             return
+        if len(ARTICLES_BY_NAME[team]) == 0:
+            await message.answer(f'Пока что новостей по команде {team} нет, но скоро они появятся.')
+            return
         title, href = choice(ARTICLES_BY_NAME[team])
         await message.answer(f'[{title}]({href})', parse_mode='Markdown')
