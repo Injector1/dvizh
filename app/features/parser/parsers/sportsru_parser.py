@@ -1,6 +1,7 @@
 import requests
 
 from bs4 import BeautifulSoup
+from typing import Tuple
 
 from app.features.base import BaseParser
 from app.features.telegraf.service import TelegrafService
@@ -13,18 +14,20 @@ class SportsRUParser(BaseParser):
     def __init__(self, telegraf_service: TelegrafService):
         self.telegraf_service = telegraf_service
 
-    def parse(self, html: type(BeautifulSoup)) -> tuple[str, str]:
+    def parse(self, html: BeautifulSoup) -> Tuple[str, str]:
+        print(123)
         title = html.find_all('header', {'class': 'news-item__header'})[0].find_all_next('h1')[0].text[1:-1]
         page = html.find_all('div', {'class': 'news-item__content'})
         page_text = [(p.text + '\n') for p in page][0]
         return title, page_text
 
-    def get_markdown_view(self, tag: str, team_name: str):
+    async def get_markdown_view(self, tag: str, team_name: str):
         html_view = self.get_html_view(self.get_url_by_tag(tag))
-
         title, page_text = self.parse(html_view)
         article = ArticleCreateOrUpdateScheme(title=title, content=page_text, team_name=team_name)
-        href = self.telegraf_service.create_telegraf_article(article)
+        print('before href')
+        href = await self.telegraf_service.create_telegraf_article(article)
+        print('after href')
         return title, href
 
     def get_html_view(self, url: str) -> type(BeautifulSoup):

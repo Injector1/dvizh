@@ -6,3 +6,5 @@ bs4
 beautifulsoup4
 pydantic
 tortoise-orm
+aioschedule
+asyncpg
