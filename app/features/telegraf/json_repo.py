@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 import json
 
@@ -9,7 +10,7 @@ from app.features.telegraf.models import TelegrafModel
 class JsonRepo(BaseRepository):
     def __init__(self, model: TelegrafModel):
         self.model = model
-        self.file = 'data.json'
+        self.file = 'app/features/telegraf/data.json'
 
     def get_by_id(self, id: str) -> TelegrafScheme:
         for data in json.load(open(self.file, encoding='utf-8'))['articles']:
@@ -25,9 +26,9 @@ class JsonRepo(BaseRepository):
             result.append(TelegrafScheme.parse_obj(json.loads(i)))
         return result
 
-    def create(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
+    async def create(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
         data = json.load(open(self.file, encoding='utf-8'))
-
+        await asyncio.sleep(0.1)
         telegraf_obj = TelegrafScheme(id=len(data['articles']) + 1, **article.dict())
         data['articles'].append(telegraf_obj.json())
         with open(self.file, "w", encoding='utf-8') as outfile:

@@ -15,7 +15,6 @@ class SportsRUParser(BaseParser):
         self.telegraf_service = telegraf_service
 
     def parse(self, html: BeautifulSoup) -> Tuple[str, str]:
-        print(123)
         title = html.find_all('header', {'class': 'news-item__header'})[0].find_all_next('h1')[0].text[1:-1]
         page = html.find_all('div', {'class': 'news-item__content'})
         page_text = [(p.text + '\n') for p in page][0]
@@ -25,9 +24,7 @@ class SportsRUParser(BaseParser):
         html_view = self.get_html_view(self.get_url_by_tag(tag))
         title, page_text = self.parse(html_view)
         article = ArticleCreateOrUpdateScheme(title=title, content=page_text, team_name=team_name)
-        print('before href')
         href = await self.telegraf_service.create_telegraf_article(article)
-        print('after href')
         return title, href
 
     def get_html_view(self, url: str) -> type(BeautifulSoup):

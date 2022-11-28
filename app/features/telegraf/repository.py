@@ -27,7 +27,6 @@ class TelegrafRepository(BaseRepository):
             telegraf_url=article.url,
             team_name=article.team_name
         )
-        print(telegraf_article)
         return await self.model_pydantic.from_tortoise_orm(telegraf_article)
 
     async def put(self, article: TelegrafCreateOrUpdateScheme) -> PydanticModel:

@@ -49,7 +49,6 @@ class NewsBot:
     async def send_news(self, message: types.Message):
         data = get_from_database()
         user = message.chat['username']
-        print(data)
         if user in data.keys():
             team = data[user]
         else:
@@ -60,6 +59,5 @@ class NewsBot:
         if team not in ARTICLES_BY_NAME.keys():
             await message.answer('Неизвестная футбольная команда')
             return
-        print(ARTICLES_BY_NAME[team][0])
         title, href = ARTICLES_BY_NAME[team][0]
         await message.answer(f'[{title}]({href})', parse_mode='Markdown')

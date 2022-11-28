@@ -23,10 +23,10 @@ if __name__ == "__main__":
         )
     )
 
-    loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(database_creation())
         '''
+        # loop.run_until_complete(database_creation())
         print(asyncio.run(TelegrafModel.create(
             title='sdfsdf',
             telegraf_url='sdf',
