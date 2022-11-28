@@ -1,27 +1,40 @@
 import math
 from typing import Callable, Any, Union
+
+from aiogram import Dispatcher
 from aiogram.utils.callback_data import CallbackData
 from uuid import uuid4
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from custom_inline_keyboards.custom_inline_keyboard import CustomInlineKeyboard
 
 
-multiset_item_select_callback = CallbackData("select_item", "ms_id", "item_id")
-multiset_page_select_callback = CallbackData("select_page", "ms_id", "page_id")
-multiset_accept_changes_callback = CallbackData("accept_ms", "ms_id")
-multiset_finish_selection_callback = CallbackData("finish_ms", "ms_id")
-unchecked_callback = CallbackData("dont_check_this")
+_item_select_callback = CallbackData("s_select_item", "ms_id", "item_id")
+_page_select_callback = CallbackData("s_select_page", "ms_id", "page_id")
+_accept_changes_callback = CallbackData("s_accept", "ms_id")
+_finish_selection_callback = CallbackData("s_finish", "ms_id")
+_unchecked_callback = CallbackData("dont_check_this")
 
 CANCEL_BUTTON_TEXT = "Отмена"
 ACCEPT_BUTTON_TEXT = "Сохранить"
 
 
-class InlineMultiselect:
-    """Список с множественным выбором"""
-    keyboard_by_id: dict[str, Any] = dict()
+class InlineSelect(CustomInlineKeyboard):
+    """Список с выбором
+    Необходим вызов InlineSelect.init_handlers"""
+
+    _keyboard_by_id: dict[str, Any] = dict()
 
     @staticmethod
     def get_by_id(ms_id: Union[int, str]):
-        return InlineMultiselect.keyboard_by_id[str(ms_id)]
+        return InlineSelect._keyboard_by_id[str(ms_id)]
+
+    @staticmethod
+    def init_handlers(dp: Dispatcher):
+        dp.register_callback_query_handler(handle_item_selection, _item_select_callback.filter())
+        dp.register_callback_query_handler(handle_page_selection, _page_select_callback.filter())
+        dp.register_callback_query_handler(handle_unchecked_callback, _unchecked_callback.filter())
+        dp.register_callback_query_handler(handle_accept_changes, _accept_changes_callback.filter())
+        dp.register_callback_query_handler(handle_finish_selection, _finish_selection_callback.filter())
 
     def __init__(self,
                  item_ids: list[int],
@@ -58,12 +71,13 @@ class InlineMultiselect:
         self.max_rows = max_rows
         self.current_page = 0
         self.page_count = math.ceil(len(self.items) / (self.max_rows * self.columns))
-        InlineMultiselect.keyboard_by_id[self.id] = self
+        InlineSelect._keyboard_by_id[self.id] = self
 
     def select_item(self, item_id: int):
         if item_id in self.selected_items:
             self.selected_items.remove(item_id)
         else:
+            self.selected_items.clear()
             self.selected_items.add(item_id)
 
     def get_markup(self) -> InlineKeyboardMarkup:
@@ -75,7 +89,7 @@ class InlineMultiselect:
             if item in self.selected_items:
                 display_name = self.selection_mark + display_name
             button = InlineKeyboardButton(text=display_name,
-                                          callback_data=multiset_item_select_callback.new(ms_id=self.id,
+                                          callback_data=_item_select_callback.new(ms_id=self.id,
                                                                                           item_id=str(item)))
             if len(keyboard[-1]) >= self.columns:
                 keyboard.append([])
@@ -85,21 +99,58 @@ class InlineMultiselect:
             next_page = (self.current_page + 1) % self.page_count
             prev_page = (self.current_page - 1) % self.page_count
             prev_button = InlineKeyboardButton(text="<",
-                                               callback_data=multiset_page_select_callback.new(ms_id=self.id,
-                                                                                               page_id=str(prev_page)))
+                                               callback_data=_page_select_callback.new(ms_id=self.id,
+                                                                                       page_id=str(prev_page)))
             next_button = InlineKeyboardButton(text=">",
-                                               callback_data=multiset_page_select_callback.new(ms_id=self.id,
-                                                                                               page_id=str(next_page)))
+                                               callback_data=_page_select_callback.new(ms_id=self.id,
+                                                                                       page_id=str(next_page)))
             page_num_button = InlineKeyboardButton(text=f"{self.current_page + 1}/{self.page_count}",
-                                                   callback_data=unchecked_callback.new())
+                                                   callback_data=_unchecked_callback.new())
             keyboard.append([prev_button, page_num_button, next_button])
 
         accept_button = InlineKeyboardButton(text=ACCEPT_BUTTON_TEXT,
-                                             callback_data=multiset_accept_changes_callback.new(ms_id=self.id))
+                                             callback_data=_accept_changes_callback.new(ms_id=self.id))
         undo_button = InlineKeyboardButton(text=CANCEL_BUTTON_TEXT,
-                                           callback_data=multiset_finish_selection_callback.new(ms_id=self.id))
+                                           callback_data=_finish_selection_callback.new(ms_id=self.id))
         keyboard.append([undo_button, accept_button])
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
     def __del__(self):
-        InlineMultiselect.keyboard_by_id.pop(self.id)
+        InlineSelect._keyboard_by_id.pop(self.id)
+
+
+async def handle_item_selection(call: CallbackQuery):
+    callback = _item_select_callback.parse(call.data)
+    ms = InlineSelect._keyboard_by_id[callback["ms_id"]]
+    item_id = callback["item_id"]
+    ms.select_item(int(item_id))
+    await call.message.edit_reply_markup(reply_markup=ms.get_markup())
+
+
+async def handle_page_selection(call: CallbackQuery):
+    callback = _page_select_callback.parse(call.data)
+    ms = InlineSelect._keyboard_by_id[callback["ms_id"]]
+    ms.current_page = int(callback["page_id"])
+    await call.message.edit_reply_markup(reply_markup=ms.get_markup())
+
+
+async def handle_unchecked_callback(call: CallbackQuery):
+    await call.answer()
+
+
+async def handle_accept_changes(call: CallbackQuery):
+    callback = _accept_changes_callback.parse(call.data)
+    ms = InlineSelect._keyboard_by_id[callback["ms_id"]]
+    selected_item_ids = [x for x in ms.items if x in ms.selected_items]
+    await ms.operation_with_selected(selected_item_ids)
+    await ms.on_finish_selection()
+    del ms
+    await call.message.delete()
+
+
+async def handle_finish_selection(call: CallbackQuery):
+    callback = _finish_selection_callback.parse(call.data)
+    ms = InlineSelect._keyboard_by_id[callback["ms_id"]]
+    await ms.on_finish_selection()
+    del ms
+    await call.message.delete()
