@@ -1,68 +1,34 @@
-from aiogram import executor, types
-from bot import dp
-from database import get_from_database, add_to_database
-from parsers import get_random_news, get_latest_news, start_updating
+import asyncio
 import threading
 
+from telegraph import Telegraph
 
-def add_commands(commands: list) -> None:
-    for command in commands:
-        dp.register_message_handler(command[0], commands=command[1])
+from create_schema import database_creation, close_connection
+from app.features.parser import ParserService
+from app.features.telegraf import TelegrafService, TelegrafModel, JsonRepo
+from app.features.bot.bot import NewsBot
 
-
-async def add_team(message: types.Message):
-    try:
-        text = message.text
-        username, team = message.chat['username'], ' '.join(text.split()[1:])
-    except IndexError:
-        await message.answer(f'Неверный формат. Попробуйте\n/set <название_команды>')
-        return
-    add_to_database(username, team)
-    await message.answer(f'Пользователю {username} успешно '
-                         f'была присвоена команда {team}.')
-
-
-async def get_team(message: types.Message):
-    username = message.chat['username']
-    data = get_from_database()
-    if username in data.keys():
-        await message.answer(f'Для пользователя {username} '
-                             f'зарегистрирована команда {data[username]}')
-    else:
-        await message.answer(f'Для пользователя {username} не '
-                             f'зарегистрирована команда. Это можно сделать '
-                             f'с помощью команды /set <название_команды>')
-
-
-def main():
-    commands = [
-        (add_team, ['set']),
-        (get_team, ['get']),
-        (send_news, ['news'])
-    ]
-    add_commands(commands)
-    executor.start_polling(dp, skip_updates=True)
-
-
-async def send_news(message: types.Message):
-    data = get_from_database()
-    user = message.chat['username']
-    if user in data.keys():
-        team = data[user]
-    else:
-        await message.answer(f'Для пользователя {user} не '
-                             f'зарегистрирована команда. Это можно сделать '
-                             f'с помощью команды /set <название_команды>')
-        return
-
-    text = message.text.split()
-    if len(text) == 1:
-        title, href = get_random_news(team)
-    else:
-        title, href = get_latest_news(team)
-    await message.answer(f'{title}[.]({href})', parse_mode='Markdown')
+from app.features.users.models import UserModel
+from app.features.users.users_repo import UserRepo
 
 
 if __name__ == "__main__":
-    thr1 = threading.Thread(target=start_updating).start()
-    main()
+    telegraph_model = TelegrafModel()
+    telegraf_repository = JsonRepo(telegraph_model)
+    telegraf_service = TelegrafService(
+        telegraf=Telegraph(),
+        telegraf_repository=telegraf_repository,
+        account_name='dvizh-bot'
+    )
+
+    parser_service = ParserService(telegraf_service)
+
+    users_model = UserModel()
+    user_repo = UserRepo(users_model)
+
+    try:
+        threading.Thread(target=parser_service.start_updating).start()
+        b = NewsBot(bot_token='5914366318:AAFihB-KhrA_8-AMX4XuRhwmwHkXgzYEDug', user_repo=user_repo)
+        b.add_commands()
+    finally:
+        asyncio.run(close_connection())

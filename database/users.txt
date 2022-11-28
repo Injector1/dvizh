@@ -1,1 +1,0 @@
-{'kuzuzma': 'barcelona', 'injector1': 'barcelona'}
