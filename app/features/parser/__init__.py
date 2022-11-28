@@ -1,2 +1,2 @@
 from .service import ParserService
-from .parsers import SportsRUParser
+from .parsers import *

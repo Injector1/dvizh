@@ -4,9 +4,12 @@ import threading
 from telegraph import Telegraph
 
 from create_schema import database_creation, close_connection
-from app.features.parser import ParserService, SportsRUParser
+from app.features.parser import ParserService
 from app.features.telegraf import TelegrafService, TelegrafModel, JsonRepo
 from app.features.bot.bot import NewsBot
+
+from app.features.users.models import UserModel
+from app.features.users.users_repo import UserRepo
 
 
 if __name__ == "__main__":
@@ -17,25 +20,15 @@ if __name__ == "__main__":
         telegraf_repository=telegraf_repository,
         account_name='dvizh-bot'
     )
-    parser_service = ParserService(
-        SportsRUParser(
-            telegraf_service=telegraf_service
-        )
-    )
 
-    # loop = asyncio.get_event_loop()
+    parser_service = ParserService(telegraf_service)
+
+    users_model = UserModel()
+    user_repo = UserRepo(users_model)
+
     try:
-        '''
-        # loop.run_until_complete(database_creation())
-        print(asyncio.run(TelegrafModel.create(
-            title='sdfsdf',
-            telegraf_url='sdf',
-            team_name='sd'
-        )))
-        parser_service.start_updating()
-        '''
-        thr1 = threading.Thread(target=parser_service.start_updating).start()
-        b = NewsBot(bot_token='5914366318:AAFihB-KhrA_8-AMX4XuRhwmwHkXgzYEDug')
+        threading.Thread(target=parser_service.start_updating).start()
+        b = NewsBot(bot_token='5914366318:AAFihB-KhrA_8-AMX4XuRhwmwHkXgzYEDug', user_repo=user_repo)
         b.add_commands()
     finally:
         asyncio.run(close_connection())

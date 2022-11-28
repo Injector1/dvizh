@@ -24,7 +24,7 @@ class SportsRUParser(BaseParser):
         html_view = self.get_html_view(self.get_url_by_tag(tag))
         title, page_text = self.parse(html_view)
         article = ArticleCreateOrUpdateScheme(title=title, content=page_text, team_name=team_name)
-        href = await self.telegraf_service.create_telegraf_article(article)
+        href = await self.telegraf_service.create_telegraf_article(article, self.base_url)
         return title, href
 
     def get_html_view(self, url: str) -> type(BeautifulSoup):
