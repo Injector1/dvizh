@@ -1,6 +1,6 @@
 from telegraph import Telegraph
 from tortoise import run_async
-from time import localtime
+import datetime
 
 from .schemas import ArticleCreateOrUpdateScheme, TelegrafCreateOrUpdateScheme
 from .repository import TelegrafRepository
@@ -17,11 +17,13 @@ class TelegrafService:
         self.telegraf_repository = telegraf_repository
         self.telegraf.create_account(short_name=account_name)
 
-    async def create_telegraf_article(self, article: ArticleCreateOrUpdateScheme):
+    async def create_telegraf_article(self, article: ArticleCreateOrUpdateScheme, origin: str):
         body = [i + '\n\n' for i in article.content.split('\n')]
+        body.append(f'{datetime.datetime.now()}')  # TODO: брать с сайта
+        body.append(f'\n{origin}')
         response = self.telegraf.create_page(
             title=article.title,
-            author_name=f'DVIZH•{localtime().tm_hour} : {localtime().tm_min}',
+            author_name=f'DVIZH',
             content=body,
             html_content=None
         )

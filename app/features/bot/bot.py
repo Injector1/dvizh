@@ -2,15 +2,16 @@ from aiogram import executor, types, Bot, Dispatcher
 import logging
 from random import choice
 
-from database import get_from_database, add_to_database
 from app.config import ARTICLES_BY_NAME
+from app.features.users.users_repo import UserRepo, UserScheme
 
 
 class NewsBot:
-    def __init__(self, bot_token: str):
+    def __init__(self, bot_token: str, user_repo: UserRepo):
         bot = Bot(token=bot_token)
-        self.dp = Dispatcher(bot)
         logging.basicConfig(level=logging.INFO)
+        self.dp = Dispatcher(bot)
+        self.users = user_repo
 
     def add_commands(self) -> None:
         commands = [
@@ -28,28 +29,30 @@ class NewsBot:
         except IndexError:
             await message.answer(f'Неверный формат. Попробуйте\n/set <название_команды>')
             return
-        add_to_database(username, team)
+        if len(self.users.find_all(chat_id=message.chat.id)) == 0:
+            await self.users.create(UserScheme(chat_id=message.chat.id, username=username, subscribed_team=team))
+        else:
+            self.users.put(UserScheme(chat_id=message.chat.id, username=username, subscribed_team=team))
+
         await message.answer(f'Пользователю {username} успешно '
                              f'была присвоена команда {team}.')
 
     async def get_team(self, message: types.Message):
-        username = message.chat['username']
-        data = get_from_database()
-        if username in data.keys():
-            await message.answer(f'Для пользователя {username} '
-                                 f'зарегистрирована команда {data[username]}')
+        current_user = self.users.get_by_id(str(message.chat.id))
+        if current_user is not None:
+            await message.answer(f'Для пользователя {current_user.username} '
+                                 f'зарегистрирована команда {current_user.subscribed_team}')
         else:
-            await message.answer(f'Для пользователя {username} не '
+            await message.answer(f'Для пользователя {message.chat["username"]} не '
                                  f'зарегистрирована команда. Это можно сделать '
                                  f'с помощью команды /set <название_команды>')
 
     async def send_news(self, message: types.Message):
-        data = get_from_database()
-        user = message.chat['username']
-        if user in data.keys():
-            team = data[user]
+        current_user = self.users.get_by_id(str(message.chat.id))
+        if current_user is not None:
+            team = current_user.subscribed_team
         else:
-            await message.answer(f'Для пользователя {user} не '
+            await message.answer(f'Для пользователя {message.chat["username"]} не '
                                  f'зарегистрирована команда. Это можно сделать '
                                  f'с помощью команды /set <название_команды>')
             return

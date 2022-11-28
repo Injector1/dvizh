@@ -14,7 +14,7 @@ class JsonRepo(BaseRepository):
 
     def get_by_id(self, id: str) -> TelegrafScheme:
         for data in json.load(open(self.file, encoding='utf-8'))['articles']:
-            telegraf_obj = TelegrafScheme.parse_obj(json.loads(data))
+            telegraf_obj = TelegrafScheme(**data)
             if telegraf_obj.id == id:
                 return telegraf_obj
 
@@ -22,18 +22,15 @@ class JsonRepo(BaseRepository):
         key, value = list(kwargs.items())[0]
         result = []
         for data in json.load(open(self.file, encoding='utf-8'))['articles']:
-            line = json.loads(data)
-            if key in line.keys():
-                if line[key] == value:
-                    result.append(TelegrafScheme.parse_obj(line))
+            if key in data.keys():
+                if data[key] == value:
+                    result.append(TelegrafScheme(**data))
         return result
 
     def get_all(self) -> List[TelegrafScheme]:
-        data = json.load(open(self.file, encoding='utf-8'))
-
         result = []
-        for i in data['articles']:
-            result.append(TelegrafScheme.parse_obj(json.loads(i)))
+        for data in json.load(open(self.file, encoding='utf-8'))['articles']:
+            result.append(TelegrafScheme(**data))
         return result
 
     async def create(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
@@ -42,21 +39,21 @@ class JsonRepo(BaseRepository):
         similar = self.find_all(title=article.title)
         if len(similar) == 0:
             telegraf_obj = TelegrafScheme(id=len(data['articles']) + 1, **article.dict())
-            data['articles'].append(telegraf_obj.json())
+            data['articles'].append(telegraf_obj.dict())
             with open(self.file, "w", encoding='utf-8') as outfile:
                 outfile.write(json.dumps(data, indent=4))
             return telegraf_obj
         return TelegrafScheme(id=similar[0].id, **article.dict())
 
     def put(self, article: TelegrafCreateOrUpdateScheme) -> TelegrafScheme:
-        m = json.load(open(self.file, encoding='utf-8'))
-        for i in range(len(m['articles'])):
-            data = m['articles'][i]
-            t = TelegrafScheme.parse_obj(json.loads(data))
+        input_data = json.load(open(self.file, encoding='utf-8'))
+        for i in range(len(input_data['articles'])):
+            data = input_data['articles'][i]
+            t = TelegrafScheme(**data)
             if t.url == article.url:
                 telegraf_obj = TelegrafScheme(id=t.id, **article.dict())
-                m['articles'][i] = telegraf_obj.json()
+                input_data['articles'][i] = telegraf_obj.dict()
 
                 with open(self.file, "w", encoding='utf-8') as outfile:
-                    outfile.write(json.dumps(m, indent=4))
+                    outfile.write(json.dumps(input_data, indent=4))
                 return telegraf_obj
