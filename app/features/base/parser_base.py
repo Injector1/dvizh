@@ -11,7 +11,7 @@ class BaseParser(ABC):
         pass
 
     @abstractmethod
-    def parse(self):
+    def parse(self, tag: str):
         """
         :return:
         Parsed view of article
@@ -19,14 +19,14 @@ class BaseParser(ABC):
         pass
 
     @abstractmethod
-    def get_markdown_view(self):
+    def get_markdown_view(self, tag: str, team_name: str):
         """
         :return: markdown view of article
         """
         pass
 
     @abstractmethod
-    def get_html_view(self):
+    def get_html_view(self, url: str):
         """
         :return: html view of article
         """
