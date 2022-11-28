@@ -4,24 +4,29 @@ import time
 import aioschedule as schedule
 
 from app.config import ARTICLES_BY_NAME, TAGS
-from .parsers.sportsru_parser import SportsRUParser
+from app.features.parser.parsers import SportsRUParser, ChampionatParser
+
+from app.features.telegraf import TelegrafService
 
 
 class ParserService:
-    def __init__(self, sportsru_parser: SportsRUParser):
-        self.sportsru_parser = sportsru_parser
-        self.method_by_site = {'sports.ru': self.sportsru_parser}
+    def __init__(self, t_service: TelegrafService):
+        self.method_by_site = {
+            'sports.ru': SportsRUParser(t_service),
+            'championat.com': ChampionatParser(t_service)
+        }
 
     async def update_all_telegraph_articles(self):
         print('start')
         for name in ARTICLES_BY_NAME.keys():
-            print(f'Updating team {name}')
             for site, tag in TAGS[name].items():
                 if site in self.method_by_site.keys():
+                    print(f'Updating {name} via {site}...')
                     article_info = await self.method_by_site[site].get_markdown_view(tag, name)
-                    if ARTICLES_BY_NAME[name][0] != article_info[0]:
-                        print(f'Change: {ARTICLES_BY_NAME[name][0]} -> {article_info[0]}')
-                    ARTICLES_BY_NAME[name][0] = article_info
+                    ARTICLES_BY_NAME[name].append(article_info)
+                    # if ARTICLES_BY_NAME[name][0] != article_info[0]:
+                    #    print(f'Change: {ARTICLES_BY_NAME[name][0]} -> {article_info[0]}')
+                    #  ARTICLES_BY_NAME[name][0] = article_info
         print('done')
 
     def start_updating(self):

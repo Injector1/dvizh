@@ -4,7 +4,7 @@ import threading
 from telegraph import Telegraph
 
 from create_schema import database_creation, close_connection
-from app.features.parser import ParserService, SportsRUParser
+from app.features.parser import ParserService, SportsRUParser, ChampionatParser
 from app.features.telegraf import TelegrafService, TelegrafModel, JsonRepo
 from app.features.bot.bot import NewsBot
 
@@ -17,11 +17,8 @@ if __name__ == "__main__":
         telegraf_repository=telegraf_repository,
         account_name='dvizh-bot'
     )
-    parser_service = ParserService(
-        SportsRUParser(
-            telegraf_service=telegraf_service
-        )
-    )
+
+    parser_service = ParserService(telegraf_service)
 
     # loop = asyncio.get_event_loop()
     try:

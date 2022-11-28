@@ -1,12 +1,9 @@
-from aiogram import executor, types
+from aiogram import executor, types, Bot, Dispatcher
+import logging
+from random import choice
 
 from database import get_from_database, add_to_database
-from app.features.parser import ParserService
 from app.config import ARTICLES_BY_NAME
-from app.features.parser.parsers import SportsRUParser
-import threading
-import logging
-from aiogram import Bot, Dispatcher
 
 
 class NewsBot:
@@ -59,5 +56,5 @@ class NewsBot:
         if team not in ARTICLES_BY_NAME.keys():
             await message.answer('Неизвестная футбольная команда')
             return
-        title, href = ARTICLES_BY_NAME[team][0]
+        title, href = choice(ARTICLES_BY_NAME[team])
         await message.answer(f'[{title}]({href})', parse_mode='Markdown')

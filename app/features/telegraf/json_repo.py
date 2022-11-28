@@ -18,6 +18,16 @@ class JsonRepo(BaseRepository):
             if telegraf_obj.id == id:
                 return telegraf_obj
 
+    def find_all(self, **kwargs) -> List[TelegrafScheme]:
+        key, value = list(kwargs.items())[0]
+        result = []
+        for data in json.load(open(self.file, encoding='utf-8'))['articles']:
+            line = json.loads(data)
+            if key in line.keys():
+                if line[key] == value:
+                    result.append(TelegrafScheme.parse_obj(line))
+        return result
+
     def get_all(self) -> List[TelegrafScheme]:
         data = json.load(open(self.file, encoding='utf-8'))
 
