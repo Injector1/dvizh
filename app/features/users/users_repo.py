@@ -34,9 +34,8 @@ class UserRepo(BaseRepository):
             result.append(UserScheme(**data))
         return result
 
-    async def create(self, user: UserScheme) -> UserScheme:
+    def create(self, user: UserScheme) -> UserScheme:
         data = json.load(open(self.file, encoding='utf-8'))
-        await asyncio.sleep(0.1)
         if len(self.find_all(chat_id=user.chat_id)) == 0:
             data['users'].append(user.dict())
             with open(self.file, "w", encoding='utf-8') as outfile:

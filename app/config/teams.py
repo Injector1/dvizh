@@ -121,7 +121,7 @@ TAGS = {
         'sports.ru': 'spartak',
         'championat.com': '1-fk-spartak'
     },
-    'Локомотв Москва': {
+    'Локомотив Москва': {
         'sports.ru': 'lokomotiv',
         'championat.com': '3-fk-lokomotiv'
     },
