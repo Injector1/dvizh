@@ -47,7 +47,7 @@ class NewsBot:
     async def get_team(self, message: types.Message):
         current_user = self.users.get_by_id(str(message.from_user.id))
         if current_user is not None:
-            await message.answer(f'Вы теперь отслеживаете команду {current_user.subscribed_team}')
+            await message.answer(f'/news - чтобы получить новости по команде {current_user.subscribed_team}')
         else:
             await message.answer(f'Для пользователя {message.chat["username"]} не '
                                  f'зарегистрирована команда. Это можно сделать '

@@ -29,7 +29,7 @@ class ParserService:
                     article_info = await self.method_by_site[site].get_markdown_view(tag, name)
                     if len(ARTICLES_BY_NAME[name]) == 0 or article_info[0] != ARTICLES_BY_NAME[name][0]:
                         ARTICLES_BY_NAME[name].insert(0, article_info)
-                        await self.bot_service.send_all(name, article_info)
+                        # await self.bot_service.send_all(name, article_info)
         print('done')
 
     async def start_updating(self, loop):
