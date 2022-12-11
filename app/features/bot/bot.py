@@ -4,16 +4,23 @@ from random import choice
 
 from app.config import ARTICLES_BY_NAME
 from app.features.users.repository import UserRepository, UserScheme
+from app.features.telegraf.json_repo import JsonRepository
 from app.features.bot.custom_inline_keyboards import InlineSelect
 
 
 class NewsBot:
-    def __init__(self, bot_token: str, user_repo: UserRepository, article_repo: JsonRepo):
-        self.bot = Bot(token=bot_token)
+    def __init__(
+            self,
+            bot: Bot,
+            dp: Dispatcher,
+            user_repository: UserRepository,
+            article_repository: JsonRepository,
+    ):
+        self.bot = bot
         logging.basicConfig(level=logging.INFO)
-        self.dp = Dispatcher(self.bot)
-        self.users = user_repo
-        self.articles = article_repo
+        self.dp = dp
+        self.users = user_repository
+        self.articles = article_repository
         InlineSelect.init_handlers(self.dp)
 
     def add_commands(self) -> None:

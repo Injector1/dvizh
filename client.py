@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 from telegraph import Telegraph
+from aiogram import Bot
 
 from app.features import ParserContainer, UserContainer, TelegrafContainer, BotContainer
 
@@ -9,6 +10,11 @@ class Application(containers.DeclarativeContainer):
 
     telegraf = providers.Singleton(
         Telegraph,
+    )
+
+    bot = providers.Singleton(
+        Bot,
+        token=config.bot.bot_token
     )
 
     telegraf_package = providers.Container(
@@ -25,6 +31,7 @@ class Application(containers.DeclarativeContainer):
     )
     bot_package = providers.Container(
         BotContainer,
+        bot=bot,
         user_repository=user_package.user_repository,
-        bot_token=config.bot.bot_token,
+        article_repository=telegraf_package.telegraf_repository,
     )

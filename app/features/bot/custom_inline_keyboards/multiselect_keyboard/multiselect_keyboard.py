@@ -5,7 +5,7 @@ from aiogram import Dispatcher
 from aiogram.utils.callback_data import CallbackData
 from uuid import uuid4
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from custom_inline_keyboards.custom_inline_keyboard import CustomInlineKeyboard
+from app.features.bot.custom_inline_keyboards.custom_inline_keyboard import CustomInlineKeyboard
 
 
 _item_select_callback = CallbackData("ms_select_item", "ms_id", "item_id")
