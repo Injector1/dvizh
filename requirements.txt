@@ -8,3 +8,4 @@ pydantic
 tortoise-orm
 aioschedule
 asyncpg
+dependency-injector

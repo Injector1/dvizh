@@ -1,3 +1,3 @@
+from .module import UserContainer
 from .service import UserService
-from .models import UserModel
-from .users_repo import *
+from .repository import UserRepository

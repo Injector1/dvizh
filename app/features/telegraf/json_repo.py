@@ -7,7 +7,7 @@ from app.features.telegraf.schemas import *
 from app.features.telegraf.models import TelegrafModel
 
 
-class JsonRepo(BaseRepository):
+class JsonRepository(BaseRepository):
     def __init__(self, model: TelegrafModel):
         self.model = model
         self.file = './database/data.json'

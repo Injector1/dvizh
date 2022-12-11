@@ -3,13 +3,12 @@ import logging
 from random import choice
 
 from app.config import ARTICLES_BY_NAME
-from app.features.users.users_repo import UserRepo, UserScheme
+from app.features.users.repository import UserRepository, UserScheme
 from app.features.bot.custom_inline_keyboards import InlineSelect
-from app.features.telegraf import JsonRepo
 
 
 class NewsBot:
-    def __init__(self, bot_token: str, user_repo: UserRepo, article_repo: JsonRepo):
+    def __init__(self, bot_token: str, user_repo: UserRepository, article_repo: JsonRepo):
         self.bot = Bot(token=bot_token)
         logging.basicConfig(level=logging.INFO)
         self.dp = Dispatcher(self.bot)

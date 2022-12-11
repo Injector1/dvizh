@@ -1,1 +1,1 @@
-from .service import BotService
+from .module import BotContainer

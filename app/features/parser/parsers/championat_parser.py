@@ -16,9 +16,9 @@ class ChampionatParser(BaseParser):
 
     def parse(self, html: BeautifulSoup) -> Tuple[str, str]:
         title = html.find_all('div', {'class': 'article-head__title'})[0].text
-        page_text = ''
-        for p in html.find('div', {'class': 'article-content'}).find_all('p', {'class': ''}):
-            page_text += f"{p.text}\n"
+        page_text = ''.join(
+            f"{p.text}\n" for p in html.find('div', {'class': 'article-content'}).find_all('p', {'class': ''})
+        )
 
         return title, page_text
 
@@ -26,7 +26,6 @@ class ChampionatParser(BaseParser):
         html_view = self.get_html_view(self.get_url_by_tag(tag))
         title, page_text = self.parse(html_view)
         article = ArticleCreateOrUpdateScheme(title=title, content=page_text, team_name=team_name)
-
         href = await self.telegraf_service.create_telegraf_article(article, self.base_url)
         return title, href
 
