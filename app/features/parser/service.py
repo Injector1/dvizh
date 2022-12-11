@@ -13,6 +13,7 @@ class ParserService:
     def __init__(
             self,
             parsers: Iterable[BaseParser]):
+        self.loop = None
         self.parsers = parsers
         self.mapped_parsers = self.map_parsers()
 

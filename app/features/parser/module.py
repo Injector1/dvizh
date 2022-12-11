@@ -17,7 +17,7 @@ class ParserContainer(containers.DeclarativeContainer):
         telegraf_service=telegraf_service
     )
 
-    parser_service = providers.Factory(
+    parser_service = providers.Singleton(
         ParserService,
         parsers=providers.List(sportsru_parser, championat_parser)
     )
