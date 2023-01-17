@@ -19,7 +19,7 @@ class TelegrafService:
 
     async def create_telegraf_article(self, article: ArticleCreateOrUpdateScheme, origin: str):
         body = [i + '\n\n' for i in article.content.split('\n')]
-        body.append(f'{datetime.datetime.now()}')  # TODO: брать с сайта
+        body.append(f'{str(datetime.datetime.now())[:16]}')  # TODO: брать с сайта
         body.append(f'\n{origin}')
         response = self.telegraf.create_page(
             title=article.title,
