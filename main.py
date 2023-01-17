@@ -29,7 +29,7 @@ def main(
         threading.Thread(target=between_callback).start()
         bot.add_commands()
     finally:
-        print(123)
+        print("Jobs done")
 
 
 if __name__ == "__main__":
