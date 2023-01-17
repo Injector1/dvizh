@@ -4,14 +4,14 @@ import datetime
 
 from .schemas import ArticleCreateOrUpdateScheme, TelegrafCreateOrUpdateScheme
 from .repository import TelegrafRepository
-from .json_repo import JsonRepo
+from .json_repo import JsonRepository
 
 
 class TelegrafService:
     def __init__(
             self,
             telegraf: Telegraph,
-            telegraf_repository: [TelegrafRepository, JsonRepo],
+            telegraf_repository: [TelegrafRepository, JsonRepository],
             account_name: str):
         self.telegraf = telegraf
         self.telegraf_repository = telegraf_repository

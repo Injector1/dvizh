@@ -7,7 +7,7 @@ from app.features.users.schemas import UserScheme
 from app.features.users.models import UserModel
 
 
-class UserRepo(BaseRepository):
+class UserRepository(BaseRepository):
     def __init__(self, model: UserModel):
         self.model = model
         self.file = './database/data.json'

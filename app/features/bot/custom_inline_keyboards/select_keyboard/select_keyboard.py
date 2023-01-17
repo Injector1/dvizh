@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Any, Union
+from typing import Callable, Any, Union, Dict, List
 
 from aiogram import Dispatcher
 from aiogram.utils.callback_data import CallbackData
@@ -22,7 +22,7 @@ class InlineSelect(CustomInlineKeyboard):
     """Список с выбором
     Необходим вызов InlineSelect.init_handlers"""
 
-    _keyboard_by_id: dict[str, Any] = dict()
+    _keyboard_by_id: Dict[str, Any] = dict()
 
     @staticmethod
     def get_by_id(ms_id: Union[int, str]):
@@ -37,11 +37,11 @@ class InlineSelect(CustomInlineKeyboard):
         dp.register_callback_query_handler(handle_finish_selection, _finish_selection_callback.filter())
 
     def __init__(self,
-                 item_ids: list[int],
+                 item_ids: List[int],
                  get_item_name_by_id: Callable[[int], str],
-                 operation_with_selected: Callable[[list[int]], Any],
+                 operation_with_selected: Callable[[List[int]], Any],
                  on_finish_selection: Callable[[], Any],
-                 selected_item: Union[list, set] = [],
+                 selected_item=None,
                  selection_mark="✓ ", columns=1, max_rows=7):
         """
         get_item_name_by_id:
@@ -59,6 +59,8 @@ class InlineSelect(CustomInlineKeyboard):
         selection_mark:
                 отметка выбранных предметов
         """
+        if selected_item is None:
+            selected_item = []
         self.id = str(uuid4())
         self.items = item_ids
         self.selected_items = set(selected_item)
