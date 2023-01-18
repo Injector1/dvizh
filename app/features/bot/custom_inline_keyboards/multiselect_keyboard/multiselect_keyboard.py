@@ -1,11 +1,12 @@
 import math
-from typing import Callable, Any, Union
+import weakref
+from typing import Callable, Any, Union, Dict
 
 from aiogram import Dispatcher
 from aiogram.utils.callback_data import CallbackData
 from uuid import uuid4
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from app.features.bot.custom_inline_keyboards.custom_inline_keyboard import CustomInlineKeyboard
+from app.features.bot.custom_inline_keyboards.custom_inline_keyboard_base import CustomInlineKeyboard
 
 
 _item_select_callback = CallbackData("ms_select_item", "ms_id", "item_id")
@@ -22,7 +23,7 @@ class InlineMultiselect(CustomInlineKeyboard):
     """Список с множественным выбором
     Необходим вызов InlineMultiselect.init_handlers"""
 
-    _keyboard_by_id: dict[str, Any] = dict()
+    _keyboard_by_id: Dict[str, Any] = weakref.WeakValueDictionary()
 
     @staticmethod
     def get_by_id(ms_id: Union[int, str]):
@@ -114,13 +115,14 @@ class InlineMultiselect(CustomInlineKeyboard):
         keyboard.append([undo_button, accept_button])
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-    def __del__(self):
-        InlineMultiselect._keyboard_by_id.pop(self.id)
-
 
 async def handle_item_selection(call: CallbackQuery):
     callback = _item_select_callback.parse(call.data)
-    ms = InlineMultiselect._keyboard_by_id[callback["ms_id"]]
+    try:
+        ms = InlineMultiselect.get_by_id(callback["ms_id"])
+    except:
+        await call.message.delete()
+        return
     item_id = callback["item_id"]
     ms.select_item(int(item_id))
     await call.message.edit_reply_markup(reply_markup=ms.get_markup())
@@ -128,7 +130,11 @@ async def handle_item_selection(call: CallbackQuery):
 
 async def handle_page_selection(call: CallbackQuery):
     callback = _page_select_callback.parse(call.data)
-    ms = InlineMultiselect._keyboard_by_id[callback["ms_id"]]
+    try:
+        ms = InlineMultiselect.get_by_id(callback["ms_id"])
+    except:
+        await call.message.delete()
+        return
     ms.current_page = int(callback["page_id"])
     await call.message.edit_reply_markup(reply_markup=ms.get_markup())
 
@@ -139,7 +145,11 @@ async def handle_unchecked_callback(call: CallbackQuery):
 
 async def handle_accept_changes(call: CallbackQuery):
     callback = _accept_changes_callback.parse(call.data)
-    ms = InlineMultiselect._keyboard_by_id[callback["ms_id"]]
+    try:
+        ms = InlineMultiselect.get_by_id(callback["ms_id"])
+    except:
+        await call.message.delete()
+        return
     selected_item_ids = [x for x in ms.items if x in ms.selected_items]
     await ms.operation_with_selected(selected_item_ids)
     await ms.on_finish_selection()
@@ -149,7 +159,11 @@ async def handle_accept_changes(call: CallbackQuery):
 
 async def handle_finish_selection(call: CallbackQuery):
     callback = _finish_selection_callback.parse(call.data)
-    ms = InlineMultiselect._keyboard_by_id[callback["ms_id"]]
+    try:
+        ms = InlineMultiselect.get_by_id(callback["ms_id"])
+    except:
+        await call.message.delete()
+        return
     await ms.on_finish_selection()
     del ms
     await call.message.delete()

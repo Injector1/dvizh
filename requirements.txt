@@ -9,3 +9,4 @@ tortoise-orm
 aioschedule
 asyncpg
 dependency-injector
+google-api-python-client

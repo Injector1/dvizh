@@ -5,6 +5,8 @@ import logging
 from random import choice
 
 from app.config import ARTICLES_BY_NAME
+from app.features.bot.interactive_message_base import InteractiveMessage
+from app.features.bot.paged_view.paged_view import PagedViewMessage
 from app.features.users.repository import UserRepository, UserScheme
 from app.features.telegraf.json_repo import JsonRepository
 from app.features.bot.custom_inline_keyboards import InlineSelect
@@ -23,7 +25,9 @@ class NewsBot:
         self.dp = dp
         self.users = user_repository
         self.articles = article_repository
+        self.last_interactive_msg_by_chat_id : dict[str, InteractiveMessage] = dict()
         InlineSelect.init_handlers(self.dp)
+        PagedViewMessage.init_handlers(self.dp)
 
     def add_commands(self) -> None:
         commands = [
@@ -74,20 +78,25 @@ class NewsBot:
         if len(m) == 0:
             await message.answer(f'Пока что новостей по команде {team} нет, но скоро они появятся.')
             return
-        response = ''
+        response = []
         dates = []
         months = {'01':'января', '02': 'февраля', '03':'марта', '04':'апреля', '05':'мая', '06':'июня',
                   '07':'июля', '08':'августа', '09':'сентября', '10':'октября', '11':'ноября', '12':'декабря'}
-        for i in range(min(len(m), 10)):
+        for k in range(min(len(m), 10)):
+            i = len(m) - k - 1
             m_date = m[i].date
             if m_date not in dates:
                 dates.append(m_date)
                 day = m_date.split('-')[2]
                 month = months[m_date.split('-')[1]]
-                response += f'\n🕑 {day} {month}\n'
+                response.append(f'\n🕑 {day} {month}\n\n')
+            else:
+                response.append('')
             title, href = m[i].title, m[i].url
-            response += f' ⚡️ [{title}]({href})\n\n'
-        await message.answer(response, parse_mode='Markdown')
+            response[-1] += f' ⚡️ [{title}]({href})'
+        pw = PagedViewMessage(response, records_on_page=5)
+        self.last_interactive_msg_by_chat_id[message.chat.id] = pw
+        await message.answer(text=pw.get_current_page_text(), reply_markup=pw.get_markup(), parse_mode='Markdown')
 
     async def show_menu(self, message: types.Message):
         items = list(ARTICLES_BY_NAME.keys())
@@ -103,4 +112,5 @@ class NewsBot:
                           on_finish_selection=lambda: self.get_team(message),
                           selection_mark="✅", max_rows=6, columns=1,
                           selected_item=already_selected)
+        self.last_interactive_msg_by_chat_id[message.chat.id] = ms
         await message.answer(text="Выберите команду из списка", reply_markup=ms.get_markup())
