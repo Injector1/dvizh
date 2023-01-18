@@ -1,5 +1,6 @@
 import datetime
 
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram import executor, types, Bot, Dispatcher
 import logging
 from random import choice
@@ -41,9 +42,16 @@ class NewsBot:
         executor.start_polling(self.dp, skip_updates=True)
 
     async def on_start(self, message: types.Message):
+        button_news = KeyboardButton('/news')
+        button_menu = KeyboardButton('/menu')
+
+        keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+        keyboard.add(button_news)
+        keyboard.add(button_menu)
+
         await message.answer(f'Данный бот позволяет отслеживать новости о вашей любимой футбольной команде.\n'
                              f'Он будет уведомлять вас при появлении свежих новостей.\n\n'
-                             f'/menu - выбор команды')
+                             f'/menu - выбор команды', reply_markup=keyboard)
 
     async def add_team(self, message: types.Message, team: str):
         user = UserScheme(
