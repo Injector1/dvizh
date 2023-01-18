@@ -71,7 +71,7 @@ class NewsBot:
         current_user = self.users.get_by_id(str(message.from_user.id))
         if current_user is None:
             await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать с помощью через меню: /menu')
+                                 f'Это можно сделать через меню: /menu')
             return
         await message.answer(f'Вы подписались на новости команды {current_user.subscribed_team}.'
                              f'Теперь вы всегда будете в курсе событий!')
@@ -81,7 +81,7 @@ class NewsBot:
         current_user = self.users.get_by_id(str(message.from_user.id))
         if current_user is None:
             await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать с помощью через меню: /menu')
+                                 f'Это можно сделать через меню: /menu')
             return
         await message.answer(f'Вы отписались на новостей команды {current_user.subscribed_team}.')
         # TODO че то сделать
@@ -92,7 +92,7 @@ class NewsBot:
             await message.answer(f'/news - чтобы получить новости по команде {current_user.subscribed_team}')
         else:
             await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать с помощью через меню: /menu')
+                                 f'Это можно сделать через меню: /menu')
 
     async def send_news(self, message: types.Message):
         current_user = self.users.get_by_id(str(message.from_user.id))
@@ -100,7 +100,7 @@ class NewsBot:
             team = current_user.subscribed_team
         else:
             await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать с помощью через меню: /menu')
+                                 f'Это можно сделать через меню: /menu')
             return
         m = self.articles.find_all(team_name=team)
         if len(m) == 0:
