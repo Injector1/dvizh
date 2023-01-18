@@ -26,24 +26,26 @@ class NewsBot:
         self.dp = dp
         self.users = user_repository
         self.articles = article_repository
-        self.last_interactive_msg_by_chat_id : dict[str, InteractiveMessage] = dict()
+        self.last_interactive_msg_by_chat_id: dict[str, InteractiveMessage] = dict()
         InlineSelect.init_handlers(self.dp)
         PagedViewMessage.init_handlers(self.dp)
 
-        button_news = KeyboardButton('/Новости')
-        button_menu = KeyboardButton('/Меню')
-        button_subc = KeyboardButton('/Подписка')
+        button_news = KeyboardButton('Новости')
+        button_menu = KeyboardButton('Меню')
+        button_subc = KeyboardButton('Подписка')
+        dp.register_message_handler(self.show_menu, lambda m: m.text == "Меню")
+        dp.register_message_handler(self.send_news, lambda m: m.text == "Новости")
+        dp.register_message_handler(lambda x: print("АНДРЕЙ У МЕНЯ ШИШКА ДЫМИТ ПРИЕЗЖАЙ СКОРЕЙ"), lambda m: m.text == "Подписка")
 
-        self.keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-        self.keyboard.add(button_news)
-        self.keyboard.add(button_menu)
+        self.keyboard = ReplyKeyboardMarkup(keyboard=[[button_news, button_menu, button_subc]],
+                                            resize_keyboard=True, input_field_placeholder='^ _ ^')
 
     def add_commands(self) -> None:
         commands = [
             (self.on_start, ['start']),
-            (self.show_menu, ['menu', 'Меню']),
+            (self.show_menu, ['menu']),
             (self.get_team, ['get', 'help']),
-            (self.send_news, ['news', 'Новости'])
+            (self.send_news, ['news'])
         ]
         for command in commands:
             self.dp.register_message_handler(command[0], commands=command[1])
