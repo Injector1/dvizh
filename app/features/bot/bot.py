@@ -1,3 +1,5 @@
+import datetime
+
 from aiogram import executor, types, Bot, Dispatcher
 import logging
 from random import choice
@@ -27,7 +29,7 @@ class NewsBot:
         commands = [
             (self.on_start, ['start']),
             (self.show_menu, ['menu']),
-            (self.get_team, ['get']),
+            (self.get_team, ['get', 'help']),
             (self.send_news, ['news'])
         ]
         for command in commands:
@@ -73,9 +75,18 @@ class NewsBot:
             await message.answer(f'Пока что новостей по команде {team} нет, но скоро они появятся.')
             return
         response = ''
+        dates = []
+        months = {'01':'января', '02': 'февраля', '03':'марта', '04':'апреля', '05':'мая', '06':'июня',
+                  '07':'июля', '08':'августа', '09':'сентября', '10':'октября', '11':'ноября', '12':'декабря'}
         for i in range(min(len(m), 10)):
+            m_date = m[i].date
+            if m_date not in dates:
+                dates.append(m_date)
+                day = m_date.split('-')[2]
+                month = months[m_date.split('-')[1]]
+                response += f'\n🕑 {day} {month}\n'
             title, href = m[i].title, m[i].url
-            response += f'[{title}]({href})\n\n'
+            response += f' ⚡️ [{title}]({href})\n\n'
         await message.answer(response, parse_mode='Markdown')
 
     async def show_menu(self, message: types.Message):
