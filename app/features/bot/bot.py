@@ -16,7 +16,7 @@ from app.features.bot.custom_inline_keyboards import InlineSelect
 
 
 DP: Dispatcher
-_subc_callback = CallbackData("sunc", "flag")
+_subc_callback = CallbackData("subc", "flag")
 
 
 class NewsBot:
@@ -90,9 +90,9 @@ class NewsBot:
         callback = _subc_callback.parse(call.data)
         sub_flag = callback["flag"]  #"sub" or "unsub"
         if sub_flag == "sub":
-            await call.message.edit_text(text="красава", reply_markup=None)
+            await call.message.edit_text(text="✅ Вы подписались на уведомления о новостях", reply_markup=None)
         else:
-            await call.message.edit_text(text="ну ты и чурка", reply_markup=None)
+            await call.message.edit_text(text="❌ Вы отписались от уведомлений", reply_markup=None)
 
     async def get_team(self, message: types.Message):
         current_user = self.users.get_by_id(str(message.from_user.id))
@@ -100,7 +100,7 @@ class NewsBot:
 
             inline_btn_1 = InlineKeyboardButton('❌', callback_data=_subc_callback.new(flag="unsub"))
             inline_btn_2 = InlineKeyboardButton('✅', callback_data=_subc_callback.new(flag="sub"))
-            inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
+            inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_2, inline_btn_1]])
 
             await message.answer(f'Желаете подписаться на уведомления о новостях команды {current_user.subscribed_team}?', reply_markup=inline_keyboard)
         else:
