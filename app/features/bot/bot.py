@@ -5,6 +5,8 @@ from aiogram import executor, types, Bot, Dispatcher
 import logging
 from random import choice
 
+from aiogram.utils.callback_data import CallbackData
+
 from app.config import ARTICLES_BY_NAME
 from app.features.bot.interactive_message_base import InteractiveMessage
 from app.features.bot.paged_view.paged_view import PagedViewMessage
@@ -14,6 +16,8 @@ from app.features.bot.custom_inline_keyboards import InlineSelect
 
 
 DP: Dispatcher
+_subc_callback = CallbackData("sunc", "flag")
+
 
 class NewsBot:
     def __init__(
@@ -41,6 +45,7 @@ class NewsBot:
         dp.register_message_handler(self.show_menu, lambda m: m.text == "Меню")
         dp.register_message_handler(self.send_news, lambda m: m.text == "Новости")
         dp.register_message_handler(self.subscribe, lambda m: m.text == "Подписка")
+        dp.register_callback_query_handler(self.handle_subscribe_callback, _subc_callback.filter())
 
         self.keyboard = ReplyKeyboardMarkup(keyboard=[[button_news, button_menu, button_subc]],
                                             resize_keyboard=True)
@@ -60,6 +65,7 @@ class NewsBot:
     async def review(self, message: types.Message):
         await message.answer(f'🔥Вышло новое видео: "Реал - Барселона. Обзор финального матча Суперкубка Испании 15.01.2023⚽️\n\n'
                              f'https://www.youtube.com/watch?v=hqfvT5YKxps"', reply_markup=self.keyboard)
+
     async def on_start(self, message: types.Message):
         await message.answer(f'Данный бот позволяет отслеживать новости о вашей любимой футбольной команде.\n'
                              f'Он будет уведомлять вас при появлении свежих новостей.   ', reply_markup=self.keyboard)
@@ -80,12 +86,20 @@ class NewsBot:
     async def subscribe(self, message: types.Message):
         await self.get_team(message)
 
+    async def handle_subscribe_callback(self, call: CallbackQuery):
+        callback = _subc_callback.parse(call.data)
+        sub_flag = callback["flag"]  #"sub" or "unsub"
+        if sub_flag == "sub":
+            await call.message.edit_text(text="красава", reply_markup=None)
+        else:
+            await call.message.edit_text(text="ну ты и чурка", reply_markup=None)
+
     async def get_team(self, message: types.Message):
         current_user = self.users.get_by_id(str(message.from_user.id))
         if current_user is not None:
 
-            inline_btn_1 = InlineKeyboardButton('✅', callback_data='subc')
-            inline_btn_2 = InlineKeyboardButton('❌', callback_data='unsubc')
+            inline_btn_1 = InlineKeyboardButton('❌', callback_data=_subc_callback.new(flag="unsub"))
+            inline_btn_2 = InlineKeyboardButton('✅', callback_data=_subc_callback.new(flag="sub"))
             inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
 
             await message.answer(f'Желаете подписаться на уведомления о новостях команды {current_user.subscribed_team}?', reply_markup=inline_keyboard)
