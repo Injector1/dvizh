@@ -19,9 +19,11 @@ class TelegrafScheme(BaseModel):
     title: str
     url: str
     team_name: str
+    date: str
 
 
 class TelegrafCreateOrUpdateScheme(BaseModel):
     title: str
     url: str
     team_name: str
+    date: str

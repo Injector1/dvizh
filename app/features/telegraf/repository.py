@@ -25,7 +25,8 @@ class TelegrafRepository(BaseRepository):
         telegraf_article = await self.model.create(
             title=article.title,
             telegraf_url=article.url,
-            team_name=article.team_name
+            team_name=article.team_name,
+            date=article.date
         )
         return await self.model_pydantic.from_tortoise_orm(telegraf_article)
 

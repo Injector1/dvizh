@@ -31,7 +31,8 @@ class TelegrafService:
             TelegrafCreateOrUpdateScheme(
                 title=article.title,
                 url=f'https://telegra.ph/{response["path"]}',
-                team_name=article.team_name
+                team_name=article.team_name,
+                date=str(datetime.datetime.now()).split()[0]
             )
         )
         return telegraf_article.url
