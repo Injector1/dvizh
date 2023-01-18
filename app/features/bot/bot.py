@@ -30,28 +30,29 @@ class NewsBot:
         InlineSelect.init_handlers(self.dp)
         PagedViewMessage.init_handlers(self.dp)
 
+        button_news = KeyboardButton('/Новости')
+        button_menu = KeyboardButton('/Меню')
+        button_subc = KeyboardButton('/Подписка')
+
+        self.keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+        self.keyboard.add(button_news)
+        self.keyboard.add(button_menu)
+
     def add_commands(self) -> None:
         commands = [
             (self.on_start, ['start']),
-            (self.show_menu, ['menu']),
+            (self.show_menu, ['menu', 'Меню']),
             (self.get_team, ['get', 'help']),
-            (self.send_news, ['news'])
+            (self.send_news, ['news', 'Новости'])
         ]
         for command in commands:
             self.dp.register_message_handler(command[0], commands=command[1])
         executor.start_polling(self.dp, skip_updates=True)
 
     async def on_start(self, message: types.Message):
-        button_news = KeyboardButton('/news')
-        button_menu = KeyboardButton('/menu')
-
-        keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-        keyboard.add(button_news)
-        keyboard.add(button_menu)
-
         await message.answer(f'Данный бот позволяет отслеживать новости о вашей любимой футбольной команде.\n'
                              f'Он будет уведомлять вас при появлении свежих новостей.\n\n'
-                             f'/menu - выбор команды', reply_markup=keyboard)
+                             f'/menu - выбор команды', reply_markup=self.keyboard)
 
     async def add_team(self, message: types.Message, team: str):
         user = UserScheme(
