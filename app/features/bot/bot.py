@@ -1,6 +1,6 @@
 import datetime
 
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram import executor, types, Bot, Dispatcher
 import logging
 from random import choice
@@ -13,6 +13,8 @@ from app.features.telegraf.json_repo import JsonRepository
 from app.features.bot.custom_inline_keyboards import InlineSelect
 
 
+DP: Dispatcher
+
 class NewsBot:
     def __init__(
             self,
@@ -23,6 +25,8 @@ class NewsBot:
     ):
         self.bot = bot
         logging.basicConfig(level=logging.INFO)
+        global DP
+        DP = dp
         self.dp = dp
         self.users = user_repository
         self.articles = article_repository
@@ -33,15 +37,17 @@ class NewsBot:
         button_news = KeyboardButton('Новости')
         button_menu = KeyboardButton('Меню')
         button_subc = KeyboardButton('Подписка')
+
         dp.register_message_handler(self.show_menu, lambda m: m.text == "Меню")
         dp.register_message_handler(self.send_news, lambda m: m.text == "Новости")
-        dp.register_message_handler(lambda x: print("АНДРЕЙ У МЕНЯ ШИШКА ДЫМИТ ПРИЕЗЖАЙ СКОРЕЙ"), lambda m: m.text == "Подписка")
+        dp.register_message_handler(self.subscribe, lambda m: m.text == "Подписка")
 
         self.keyboard = ReplyKeyboardMarkup(keyboard=[[button_news, button_menu, button_subc]],
-                                            resize_keyboard=True, input_field_placeholder='^ _ ^')
+                                            resize_keyboard=True)
 
     def add_commands(self) -> None:
         commands = [
+            (self.review, ['r']),
             (self.on_start, ['start']),
             (self.show_menu, ['menu']),
             (self.get_team, ['get', 'help']),
@@ -51,16 +57,20 @@ class NewsBot:
             self.dp.register_message_handler(command[0], commands=command[1])
         executor.start_polling(self.dp, skip_updates=True)
 
+    async def review(self, message: types.Message):
+        await message.answer(f'🔥Вышло новое видео: "Реал - Барселона. Обзор финального матча Суперкубка Испании 15.01.2023⚽️\n\n'
+                             f'https://www.youtube.com/watch?v=hqfvT5YKxps"', reply_markup=self.keyboard)
     async def on_start(self, message: types.Message):
         await message.answer(f'Данный бот позволяет отслеживать новости о вашей любимой футбольной команде.\n'
-                             f'Он будет уведомлять вас при появлении свежих новостей.\n\n'
-                             f'/menu - выбор команды', reply_markup=self.keyboard)
+                             f'Он будет уведомлять вас при появлении свежих новостей.   ', reply_markup=self.keyboard)
 
     async def add_team(self, message: types.Message, team: str):
+        current_user = self.users.get_by_id(str(message.from_user.id))
         user = UserScheme(
             chat_id=str(message.from_user.id),
             username=message.from_user.username,
-            subscribed_team=team
+            subscribed_team=team,
+            notify="0" if current_user is not None else current_user.notify
         )
         if len(self.users.find_all(chat_id=str(message.from_user.id))) == 0:
             self.users.create(user)
@@ -68,31 +78,20 @@ class NewsBot:
             self.users.put(user)
 
     async def subscribe(self, message: types.Message):
-        current_user = self.users.get_by_id(str(message.from_user.id))
-        if current_user is None:
-            await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать через меню: /menu')
-            return
-        await message.answer(f'Вы подписались на новости команды {current_user.subscribed_team}.'
-                             f'Теперь вы всегда будете в курсе событий!')
-        # TODO че то сделать
-
-    async def unsubscribe(self, message: types.Message):
-        current_user = self.users.get_by_id(str(message.from_user.id))
-        if current_user is None:
-            await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать через меню: /menu')
-            return
-        await message.answer(f'Вы отписались на новостей команды {current_user.subscribed_team}.')
-        # TODO че то сделать
+        await self.get_team(message)
 
     async def get_team(self, message: types.Message):
         current_user = self.users.get_by_id(str(message.from_user.id))
         if current_user is not None:
-            await message.answer(f'/news - чтобы получить новости по команде {current_user.subscribed_team}')
+
+            inline_btn_1 = InlineKeyboardButton('✅', callback_data='subc')
+            inline_btn_2 = InlineKeyboardButton('❌', callback_data='unsubc')
+            inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[[inline_btn_1, inline_btn_2]])
+
+            await message.answer(f'Желаете подписаться на уведомления о новостях команды {current_user.subscribed_team}?', reply_markup=inline_keyboard)
         else:
             await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать через меню: /menu')
+                                 f'Это можно сделать через меню.', reply_markup=self.keyboard)
 
     async def send_news(self, message: types.Message):
         current_user = self.users.get_by_id(str(message.from_user.id))
@@ -100,11 +99,11 @@ class NewsBot:
             team = current_user.subscribed_team
         else:
             await message.answer(f'Ой! Вы не выбрали какую команду отслеживать! '
-                                 f'Это можно сделать через меню: /menu')
+                                 f'Это можно сделать через меню.', reply_markup=self.keyboard)
             return
         m = self.articles.find_all(team_name=team)
         if len(m) == 0:
-            await message.answer(f'Пока что новостей по команде {team} нет, но скоро они появятся.')
+            await message.answer(f'Пока что новостей по команде {team} нет, но скоро они появятся.', reply_markup=self.keyboard)
             return
         response = []
         dates = []

@@ -49,6 +49,7 @@ class UserRepository(BaseRepository):
                 if d['chat_id'] == user.chat_id:
                     d['username'] = user.username
                     d['subscribed_team'] = user.subscribed_team
+                    d['notify'] = user.notify
                     break
             with open(self.file, "w", encoding='utf-8') as outfile:
                 outfile.write(json.dumps(data, indent=4))
