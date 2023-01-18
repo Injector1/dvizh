@@ -75,8 +75,7 @@ class NewsBot:
         user = UserScheme(
             chat_id=str(message.from_user.id),
             username=message.from_user.username,
-            subscribed_team=team,
-            notify="0" if current_user is not None else current_user.notify
+            subscribed_team=team
         )
         if len(self.users.find_all(chat_id=str(message.from_user.id))) == 0:
             self.users.create(user)

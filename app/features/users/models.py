@@ -6,4 +6,3 @@ class UserModel(Model):
     chat_id = fields.CharField(max_length=64, unique=True)
     username = fields.CharField(max_length=64, unique=True)
     subscribed_team = fields.CharField(max_length=64)
-    notify = fields.CharField(max_length=2)
