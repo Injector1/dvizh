@@ -74,7 +74,7 @@ class NewsBot:
         current_user = self.users.get_by_id(str(message.from_user.id))
         user = UserScheme(
             chat_id=str(message.from_user.id),
-            username=message.from_user.username,
+            username=message.from_user.username or message.from_user.id,
             subscribed_team=team
         )
         if len(self.users.find_all(chat_id=str(message.from_user.id))) == 0:
